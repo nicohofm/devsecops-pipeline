@@ -1,0 +1,47 @@
+name: DevSecOps Pipeline
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.8'
+
+      - name: Install dependencies
+        run: |
+          pip install -r src/requirements.txt
+
+      - name: Run SAST (bandit)
+        run: |
+          pip install bandit
+          bandit -r src/ > bandit_report.txt
+          cat bandit_report.txt
+
+      - name: Run Tests
+        run: |
+          python -m unittest discover -s tests
+
+      - name: Dependency Scanning (Safety)
+        run: |
+          pip install safety
+          safety check > safety_report.txt
+          cat safety_report.txt
+
+      - name: Docker Build and Scan
+        run: |
+          echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+          docker build -t devsecops-example src/
+          docker run devsecops-example > docker_output.txt
+          trivy image devsecops-example > trivy_report.txt
+          cat trivy_report.txt
