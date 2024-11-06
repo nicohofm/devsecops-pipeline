@@ -62,7 +62,7 @@ jobs:
           sudo apt-get install -y unzip
 
           # Download the OWASP Dependency-Check release
-          wget https://github.com/jeremylong/DependencyCheck/releases/download/v6.5.1/dependency-check-6.5.1-release.zip
+          wget https://github.com/jeremydmiller/owasp-dependency-check/releases/download/v6.5.1/dependency-check-6.5.1-release.zip
 
           # Verify the download
           if [ ! -f "dependency-check-6.5.1-release.zip" ]; then
@@ -78,6 +78,9 @@ jobs:
 
           # Create a symbolic link for easier access
           ln -s /opt/dependency-check/bin/dependency-check /usr/local/bin/dependency-check
+
+          # Verify if the dependency-check command is now available
+          dependency-check --version
 
       # Run Dependency-Check for each app
       - name: Run Dependency-Check for ${{ matrix.app }}
