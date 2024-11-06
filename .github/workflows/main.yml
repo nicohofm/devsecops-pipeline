@@ -39,15 +39,6 @@ jobs:
           pytest --maxfail=1 --disable-warnings --junitxml=$GITHUB_WORKSPACE/src/${{ matrix.app }}/test-report/results.xml
         continue-on-error: true
 
-      # Upload Unit Test Report
-      - name: Upload Unit Test Report for ${{ matrix.app }}
-        if: always()
-        uses: actions/upload-artifact@v3
-        with:
-          name: unit-test-report-${{ matrix.app }}
-          path: $GITHUB_WORKSPACE/src/${{ matrix.app }}/test-report/
-          if-no-files-found: warn
-
       # Run SAST with Bandit for each app
       - name: Run SAST with Bandit for ${{ matrix.app }}
         run: |
@@ -55,15 +46,6 @@ jobs:
           cd $GITHUB_WORKSPACE/src/${{ matrix.app }}
           bandit -r . -f xml -o $GITHUB_WORKSPACE/src/${{ matrix.app }}/bandit-report/bandit-report.xml || true
         continue-on-error: true
-
-      # Upload Bandit SAST Report
-      - name: Upload Bandit SAST Report for ${{ matrix.app }}
-        if: always()
-        uses: actions/upload-artifact@v3
-        with:
-          name: bandit-sast-report-${{ matrix.app }}
-          path: $GITHUB_WORKSPACE/src/${{ matrix.app }}/bandit-report/
-          if-no-files-found: warn
 
       # Install OWASP Dependency-Check
       - name: Install OWASP Dependency-Check
@@ -94,7 +76,7 @@ jobs:
       # Upload Dependency-Check Report
       - name: Upload Dependency-Check Report
         if: always()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: dependency-check-report-${{ matrix.app }}
           path: $GITHUB_WORKSPACE/src/${{ matrix.app }}/dependency-check-report/
