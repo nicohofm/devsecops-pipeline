@@ -28,7 +28,7 @@ jobs:
       # Install dependencies for each app
       - name: Install dependencies for ${{ matrix.app }}
         run: |
-          cd $GITHUB_WORKSPACE/src/${{ matrix.app }}
+          cd $GITHUB_WORKSPACE/src
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           pip install bandit  # Install Bandit
