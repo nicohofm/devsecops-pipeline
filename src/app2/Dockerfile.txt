@@ -2,15 +2,15 @@
 FROM python:3.8-slim
 
 # Setze das Arbeitsverzeichnis
-WORKDIR /app
+WORKDIR /devsecops-pipeline
 
 # Kopiere die requirements.txt und installiere die Abhängigkeiten
-COPY src/app2/requirements.txt /app/
+COPY src/app2/requirements.txt /devsecops-pipeline/
 
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Kopiere den Code von app2
-COPY src/app2 /app/src/app2
+COPY src/app2 /devsecops-pipeline/src/app2
 
 # Setze den Startbefehl für app2
-CMD ["python", "/app/src/app2/app.py"]
+CMD ["python", "/devsecops-pipeline/src/app2/app.py"]
