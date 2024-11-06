@@ -60,10 +60,12 @@ jobs:
         run: |
           pip install safety
           if [ -f "$GITHUB_WORKSPACE/src/${{ matrix.app }}/requirements.txt" ]; then
-            safety scan -r $GITHUB_WORKSPACE/src/${{ matrix.app }}/requirements.txt || true
+            safety scan -r $GITHUB_WORKSPACE/src/${{ matrix.app }} || true
           else
             echo "No requirements.txt for ${{ matrix.app }}, skipping Safety check"
           fi
+        env:
+          SAFETY_API_KEY: ${{ secrets.SAFETY_API_KEY }}  # Ensure SAFETY_API_KEY is set in GitHub Secrets
         continue-on-error: true  # Continue even if vulnerabilities are found
 
       # Set up Trivy to scan Docker image for each app
