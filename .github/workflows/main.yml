@@ -72,16 +72,18 @@ jobs:
           dependency-check --project ${{ matrix.app }} --scan $GITHUB_WORKSPACE/src/${{ matrix.app }} --out $GITHUB_WORKSPACE/src/${{ matrix.app }}/dependency-check-report
 
           # Ausgabe des Verzeichnisinhalts zur Überprüfung
+          echo "Contents of the dependency-check-report directory:"
           ls -al $GITHUB_WORKSPACE/src/${{ matrix.app }}/dependency-check-report
         continue-on-error: true
 
-      # Upload Dependency-Check Report als Artefakt
+      # Upload Dependency-Check Report als Artefakt (nach Verzeichnisüberprüfung)
       - name: Upload Dependency-Check Report
+        if: always()
         uses: actions/upload-artifact@v3
         with:
           name: dependency-check-report-${{ matrix.app }}
           path: $GITHUB_WORKSPACE/src/${{ matrix.app }}/dependency-check-report/
-        if: always()  # Ensure this runs even if the dependency-check fails
+          if-no-files-found: warn  # Warnung statt Fehler, wenn keine Dateien gefunden werden
 
       # Build Docker image for each app
       - name: Build Docker image for ${{ matrix.app }}
@@ -100,3 +102,4 @@ jobs:
       - name: Scan Docker image for vulnerabilities with Trivy for ${{ matrix.app }}
         run: |
           trivy image --severity HIGH,CRITICAL --no-progress ${{ matrix.app }}:latest || true
+
