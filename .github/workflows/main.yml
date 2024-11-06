@@ -27,6 +27,7 @@ jobs:
         run: |
           cd $GITHUB_WORKSPACE/src
           python -m pip install --upgrade pip
+          
           pip install bandit
           pip install pytest  
           pip install flask
@@ -45,45 +46,46 @@ jobs:
           bandit -r . || true
         continue-on-error: true
 
-      # Install OWASP Dependency-Check
+     # Install OWASP Dependency-Check
       - name: Install OWASP Dependency-Check
         run: |
+          
+          # Install unzip if not available
           sudo apt-get update
           sudo apt-get install -y unzip
+          
+          # Download the OWASP Dependency-Check release
           wget https://github.com/jeremylong/DependencyCheck/releases/download/v6.5.1/dependency-check-6.5.1-release.zip
+          
+          # Verify the download
           if [ ! -f "dependency-check-6.5.1-release.zip" ]; then
             echo "Dependency-Check ZIP download failed!"
             exit 1
           fi
+
+          # Unzip the downloaded file
           unzip dependency-check-6.5.1-release.zip -d /opt/
+          
+          # Check the contents of the unzipped directory
+          ls /opt/dependency-check*
+
+          # Check if the dependency-check executable is present
           if [ ! -f "/opt/dependency-check/bin/dependency-check.sh" ]; then
             echo "Dependency-Check executable not found!"
             exit 1
           fi
+
+          # Make the executable available in the PATH
           sudo ln -s /opt/dependency-check/bin/dependency-check.sh /usr/local/bin/dependency-check
 
       # Run Dependency-Check for each app
       - name: Run Dependency-Check for ${{ matrix.app }}
         run: |
-          # Sicherstellen, dass das Ausgabe-Verzeichnis existiert
-          mkdir -p $GITHUB_WORKSPACE/src/${{ matrix.app }}/dependency-check-report
-          
-          # Dependency-Check ausführen und Ergebnisse im Report-Verzeichnis speichern
+          # Run Dependency-Check for the application
           dependency-check --project ${{ matrix.app }} --scan $GITHUB_WORKSPACE/src/${{ matrix.app }} --out $GITHUB_WORKSPACE/src/${{ matrix.app }}/dependency-check-report
-
-          # Ausgabe des Verzeichnisinhalts zur Überprüfung
-          ls -al $GITHUB_WORKSPACE/src/${{ matrix.app }}/dependency-check-report
         continue-on-error: true
 
-      # Upload Dependency-Check Report als Artefakt
-      - name: Upload Dependency-Check Report
-        uses: actions/upload-artifact@v3
-        with:
-          name: dependency-check-report-${{ matrix.app }}
-          path: $GITHUB_WORKSPACE/src/${{ matrix.app }}/dependency-check-report/
-        if: always()  # Ensure this runs even if the dependency-check fails
-
-      # Build Docker image for each app
+       # Build Docker image for each app
       - name: Build Docker image for ${{ matrix.app }}
         run: |
           cd $GITHUB_WORKSPACE/src/${{ matrix.app }}
