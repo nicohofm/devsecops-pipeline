@@ -63,9 +63,8 @@ jobs:
             safety check -r $GITHUB_WORKSPACE/src/${{ matrix.app }}/requirements.txt || true
           else
             echo "No requirements.txt for ${{ matrix.app }}, skipping Safety check"
-            continue-on-error: true  # Continue even if vulnerabilities are found
           fi
-        
+        continue-on-error: true  # Continue even if vulnerabilities are found
 
       # Set up Trivy to scan Docker image for each app
       - name: Set up Trivy for ${{ matrix.app }}
