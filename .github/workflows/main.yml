@@ -54,6 +54,14 @@ jobs:
           bandit -r . || true
         continue-on-error: true
 
+      # Run Dependency-Check for each app
+      - name: Run Dependency-Check for ${{ matrix.app }}
+        uses: jeremydmiller/owasp-dependency-check-action@v3
+        with:
+          project: ${{ matrix.app }}
+          directory: $GITHUB_WORKSPACE/src/${{ matrix.app }}
+        continue-on-error: true
+
        # Build Docker image for each app
       - name: Build Docker image for ${{ matrix.app }}
         run: |
