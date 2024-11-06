@@ -76,9 +76,6 @@ jobs:
           
           # Check the contents of the unzipped directory
           ls /opt/dependency-check*
-          
-          # Create a symbolic link for easier access
-          ln -s /opt/dependency-check/bin/dependency-check /usr/local/bin/dependency-check
 
           # Check if the dependency-check executable is present
           if [ ! -f "/opt/dependency-check/bin/dependency-check.sh" ]; then
