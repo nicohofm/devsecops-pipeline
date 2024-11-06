@@ -31,15 +31,9 @@ jobs:
           cd $GITHUB_WORKSPACE/src
           python -m pip install --upgrade pip
           
-          pip install bandit  # Install Bandit
-          pip install pytest  # Install pytest if not already in requirements.txt
+          pip install bandit
+          pip install pytest  
           pip install flask
-
-          if [ -f "requirements.txt" ]; then
-            pip install -r requirements.txt
-          else
-            echo "No requirements.txt found for ${{ matrix.app }}"
-          fi
 
       # Run Unit Tests for each app
       - name: Run Unit Tests for ${{ matrix.app }}
