@@ -54,18 +54,18 @@ jobs:
           bandit -r . || true
         continue-on-error: true
 
+       # Build Docker image for each app
+      - name: Build Docker image for ${{ matrix.app }}
+        run: |
+          cd $GITHUB_WORKSPACE/src/${{ matrix.app }}
+          docker build -t ${{ matrix.app }} -f src/${{ matrix.app }}/Dockerfile .
+
       # Set up Trivy to scan Docker image for each app
       - name: Set up Trivy for ${{ matrix.app }}
         uses: aquasecurity/trivy-action@master
         with:
           image-ref: ${{ matrix.app }}:latest
         continue-on-error: true
-
-       # Build Docker image for each app
-      - name: Build Docker image for ${{ matrix.app }}
-        run: |
-          cd $GITHUB_WORKSPACE/src/${{ matrix.app }}
-          docker build -t ${{ matrix.app }} -f src/${{ matrix.app }}/Dockerfile .
 
       # Scan Docker image for vulnerabilities with Trivy
       - name: Scan Docker image for vulnerabilities with Trivy for ${{ matrix.app }}
