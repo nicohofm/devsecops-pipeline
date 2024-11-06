@@ -85,6 +85,13 @@ jobs:
           dependency-check --project ${{ matrix.app }} --scan $GITHUB_WORKSPACE/src/${{ matrix.app }} --out $GITHUB_WORKSPACE/src/${{ matrix.app }}/dependency-check-report
         continue-on-error: true
 
+      # Speichern des HTML-Berichts als Artefakt
+      - name: Upload Dependency Check Report
+        uses: actions/upload-artifact@v3
+        with:
+          name: dependency-check-report
+          path: reports/dependency-check-report.html
+
        # Build Docker image for each app
       - name: Build Docker image for ${{ matrix.app }}
         run: |
