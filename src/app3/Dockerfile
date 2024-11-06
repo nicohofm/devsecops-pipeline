@@ -1,16 +1,18 @@
 # Verwende ein offizielles Python-Image als Basis
-FROM python:3.8-slim
+FROM python:3.9-slim
 
-# Setze das Arbeitsverzeichnis
-WORKDIR /devsecops-pipeline
+# Setze das Arbeitsverzeichnis im Container
+WORKDIR /app
 
-# Kopiere die requirements.txt und installiere die Abhängigkeiten
-COPY src/app3/requirements.txt /devsecops-pipeline/
+# Kopiere die Anwendungsdateien in das Arbeitsverzeichnis
+COPY . /app
 
+# Installiere die Abhängigkeiten
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Kopiere den Code von app3
-COPY src/app3 /devsecops-pipeline/src/app3
+# Exponiere den Port, auf dem die App läuft
+EXPOSE 5000
 
-# Setze den Startbefehl für app3
-CMD ["python", "/devsecops-pipeline/src/app3/app.py"]
+# Definiere den Befehl, der ausgeführt wird, wenn der Container startet
+CMD ["python", "app3.py"]
+
