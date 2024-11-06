@@ -60,7 +60,7 @@ jobs:
         run: |
           pip install safety
           if [ -f "$GITHUB_WORKSPACE/src/${{ matrix.app }}/requirements.txt" ]; then
-            safety scan -r $GITHUB_WORKSPACE/src/${{ matrix.app }} || true
+            safety scan -r $GITHUB_WORKSPACE/src/${{ matrix.app }} --no-interaction || true
           else
             echo "No requirements.txt for ${{ matrix.app }}, skipping Safety check"
           fi
