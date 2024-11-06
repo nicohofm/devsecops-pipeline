@@ -30,14 +30,14 @@ jobs:
         run: |
           cd $GITHUB_WORKSPACE/src
           python -m pip install --upgrade pip
-          pip install -r requirements.txt
+          
           pip install bandit  # Install Bandit
           pip install pytest  # Install pytest if not already in requirements.txt
 
           # Conditional Flask installation for app1
           if [ "${{ matrix.app }}" == "app1" ]; then
             echo "Installing Flask for app1"
-            pip install flask
+            pip install -r requirements.txt
           else
             echo "Skipping Flask installation for ${{ matrix.app }}"
           fi
