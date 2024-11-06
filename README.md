@@ -5,3 +5,8 @@ bandit manuell ausfuehren (Pycharm Terminal):
 -   pip install bandit
 -   bandit -r app.py
 -   Test
+
+-   Für die Fehlerbehebung:
+    -   Ausführen der Pipeline
+    -   Analysieren der Fehler
+    -   Ändern der Fehler in der main.yml
