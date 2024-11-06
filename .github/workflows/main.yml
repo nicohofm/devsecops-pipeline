@@ -54,10 +54,30 @@ jobs:
           bandit -r . || true
         continue-on-error: true
 
+     # Install OWASP Dependency-Check
       - name: Install OWASP Dependency-Check
         run: |
-          curl -LO https://github.com/jeremylong/DependencyCheck/releases/download/v6.5.1/dependency-check-6.5.1-release.zip
-          tar -xvzf dependency-check-6.5.1-release.zip  # Verwende tar, wenn unzip nicht funktioniert./dependency-check/bin/dependency-check.sh --project ${{ matrix.app }} --scan $GITHUB_WORKSPACE/src/${{ matrix.app }}
+          # Install unzip if not available
+          sudo apt-get update
+          sudo apt-get install -y unzip
+
+          # Download the OWASP Dependency-Check release
+          wget https://github.com/jeremydmiller/owasp-dependency-check/releases/download/v6.5.1/dependency-check-6.5.1-release.zip
+
+          # Verify the download
+          if [ ! -f "dependency-check-6.5.1-release.zip" ]; then
+            echo "Dependency-Check ZIP download failed!"
+            exit 1
+          fi
+
+          # Unzip the downloaded file
+          unzip dependency-check-6.5.1-release.zip -d /opt/
+
+          # Check the contents of the unzipped directory
+          ls /opt/dependency-check*
+
+          # Create a symbolic link for easier access
+          ln -s /opt/dependency-check/bin/dependency-check /usr/local/bin/dependency-check
 
       # Run Dependency-Check for each app
       - name: Run Dependency-Check for ${{ matrix.app }}
