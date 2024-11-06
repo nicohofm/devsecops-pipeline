@@ -59,7 +59,7 @@ jobs:
       - name: Check vulnerabilities in dependencies with Safety for ${{ matrix.app }}
         run: |
           pip install safety
-          cd $GITHUB_WORKSPACE/src/${{ matrix.app }}
+          cd $GITHUB_WORKSPACE/src
           safety check -r requirements.txt
         continue-on-error: true 
 
