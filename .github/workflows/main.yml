@@ -33,6 +33,7 @@ jobs:
           
           pip install bandit  # Install Bandit
           pip install pytest  # Install pytest if not already in requirements.txt
+          pip install flask
 
           if [ -f "requirements.txt" ]; then
             pip install -r requirements.txt
