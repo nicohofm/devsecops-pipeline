@@ -58,7 +58,7 @@ jobs:
       - name: Build Docker image for ${{ matrix.app }}
         run: |
           cd $GITHUB_WORKSPACE/src/${{ matrix.app }}
-          docker build -t ${{ matrix.app }} -f Dockerfile .
+          docker build -t ${{ matrix.app }} -f $GITHUB_WORKSPACE/src/${{ matrix.app }}/Dockerfile $GITHUB_WORKSPACE/src/${{ matrix.app }}
 
       # Set up Trivy to scan Docker image for each app
       - name: Set up Trivy for ${{ matrix.app }}
