@@ -102,4 +102,3 @@ jobs:
       - name: Scan Docker image for vulnerabilities with Trivy for ${{ matrix.app }}
         run: |
           trivy image --severity HIGH,CRITICAL --no-progress ${{ matrix.app }}:latest || true
-
