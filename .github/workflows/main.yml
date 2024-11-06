@@ -31,6 +31,7 @@ jobs:
           cd $GITHUB_WORKSPACE/src/${{ matrix.app }}
           python -m pip install --upgrade pip
           pip install -r requirements.txt
+          pip install pytest  # Install pytest if not already in requirements.txt
 
       # Run Unit Tests for each app
       - name: Run Unit Tests for ${{ matrix.app }}
