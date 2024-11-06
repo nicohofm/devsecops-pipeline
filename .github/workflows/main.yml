@@ -34,6 +34,14 @@ jobs:
           pip install bandit  # Install Bandit
           pip install pytest  # Install pytest if not already in requirements.txt
 
+          # Conditional Flask installation for app1
+          if [ "${{ matrix.app }}" == "app1" ]; then
+            echo "Installing Flask for app1"
+            pip install flask
+          else
+            echo "Skipping Flask installation for ${{ matrix.app }}"
+          fi
+
       # Run Unit Tests for each app
       - name: Run Unit Tests for ${{ matrix.app }}
         run: |
@@ -60,3 +68,15 @@ jobs:
       #   with:
       #     image-ref: ${{ matrix.app }}:latest
       #   continue-on-error: true
+
+      # # Build Docker image for each app
+      # - name: Build Docker image for ${{ matrix.app }}
+      #   run: |
+      #     cd $GITHUB_WORKSPACE/src/${{ matrix.app }}
+      #     docker build -t ${{ matrix.app }}:latest .
+
+      # # Scan Docker image for vulnerabilities with Trivy
+      # - name: Scan Docker image for vulnerabilities with Trivy for ${{ matrix.app }}
+      #   run: |
+      #     trivy image --severity HIGH,CRITICAL --no-progress ${{ matrix.app }}:latest
+      #   continue-on-error: true  # Continue even if vulnerabilities are found in Docker image
