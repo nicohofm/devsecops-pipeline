@@ -1,4 +1,78 @@
-name: DevSecOps Pipeline with Vulnerability Management
+# name: DevSecOps Pipeline with Vulnerability Management
+
+# on:
+#   push:
+#     branches:
+#       - main
+#   pull_request:
+#     branches:
+#       - main
+
+# jobs:
+#   build-test-scan:
+#     runs-on: ubuntu-latest
+
+#     strategy:
+#       matrix:
+#         app: [app3, app2, app1]  # List all applications here
+
+#     steps:
+#       - name: Checkout code
+#         uses: actions/checkout@v2
+
+#       - name: Set up Python
+#         uses: actions/setup-python@v2
+#         with:
+#           python-version: '3.9'
+
+#       # Install dependencies for each app
+#       - name: Install dependencies for ${{ matrix.app }}
+#         run: |
+#           cd $GITHUB_WORKSPACE/src
+#           python -m pip install --upgrade pip
+          
+#           pip install bandit  # Install Bandit
+#           pip install pytest  # Install pytest if not already in requirements.txt
+
+#           # Install dependencies from app-specific requirements.txt
+#           if [ -f "requirements.txt" ]; then
+#             pip install -r requirements.txt
+#           else
+#             echo "No requirements.txt found for ${{ matrix.app }}"
+#           fi
+
+#       # Run Unit Tests for each app
+#       - name: Run Unit Tests for ${{ matrix.app }}
+#         run: |
+#           cd $GITHUB_WORKSPACE/src/${{ matrix.app }}
+#           pytest --maxfail=1 --disable-warnings
+
+#       # Run SAST with Bandit for each app
+#       - name: Run SAST with Bandit for ${{ matrix.app }}
+#         run: |
+#           cd $GITHUB_WORKSPACE/src/${{ matrix.app }}
+#           bandit -r . || true
+#         continue-on-error: true
+
+#       # Set up Trivy to scan Docker image for each app
+#       - name: Set up Trivy for ${{ matrix.app }}
+#         uses: aquasecurity/trivy-action@master
+#         with:
+#           image-ref: ${{ matrix.app }}:latest
+#         continue-on-error: true
+
+#        # Build Docker image for each app
+#       - name: Build Docker image for ${{ matrix.app }}
+#         run: |
+#           cd $GITHUB_WORKSPACE/src/${{ matrix.app }}
+#           docker build -t ${{ matrix.app }} -f src/${{ matrix.app }}/Dockerfile .
+
+#       # Scan Docker image for vulnerabilities with Trivy
+#       - name: Scan Docker image for vulnerabilities with Trivy for ${{ matrix.app }}
+#         run: |
+#           trivy image --severity HIGH,CRITICAL --no-progress ${{ matrix.app }}:latest || true
+
+name: DevSecOps Pipeline
 
 on:
   push:
@@ -8,8 +82,10 @@ on:
     branches:
       - main
 
+    
+
 jobs:
-  build-test-scan:
+  security-scan:
     runs-on: ubuntu-latest
 
     strategy:
@@ -17,69 +93,30 @@ jobs:
         app: [app3, app2, app1]  # List all applications here
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
+    # 1. Checkout Code
+    - name: Checkout repository
+      uses: actions/checkout@v2
 
-      - name: Set up Python
-        uses: actions/setup-python@v2
-        with:
-          python-version: '3.9'
+    # Run SAST with Bandit for each app
+    - name: Run SAST with Bandit for ${{ matrix.app }}
+      run: |
+        cd $GITHUB_WORKSPACE/src/${{ matrix.app }}
+        bandit -r . || true
+      continue-on-error: true
 
-      # Install dependencies for each app
-      - name: Install dependencies for ${{ matrix.app }}
-        run: |
-          cd $GITHUB_WORKSPACE/src
-          python -m pip install --upgrade pip
-          
-          pip install bandit  # Install Bandit
-          pip install pytest  # Install pytest if not already in requirements.txt
+    # 3. Run Dependency Scanning (z.B. mit Dependabot)
+    - name: Run Dependency Check with Dependabot
+      uses: dependabot/fetch-metadata@v1
 
-          # Install dependencies from app-specific requirements.txt
-          if [ -f "requirements.txt" ]; then
-            pip install -r requirements.txt
-          else
-            echo "No requirements.txt found for ${{ matrix.app }}"
-          fi
+    # 4. Secret Scanning (z.B. mit GitLeaks)
+    - name: Scan for Secrets
+      run: |
+        git clone https://github.com/zricethezav/gitleaks.git
+        cd gitleaks
+        ./gitleaks detect --source=./ --verbose
 
-      # Run Unit Tests for each app
-      - name: Run Unit Tests for ${{ matrix.app }}
-        run: |
-          cd $GITHUB_WORKSPACE/src/${{ matrix.app }}
-          pytest --maxfail=1 --disable-warnings
-
-      # Run SAST with Bandit for each app
-      - name: Run SAST with Bandit for ${{ matrix.app }}
-        run: |
-          cd $GITHUB_WORKSPACE/src/${{ matrix.app }}
-          bandit -r . || true
-        continue-on-error: true  
-
-      # Check for vulnerabilities in Python dependencies with Safety
-      - name: Check vulnerabilities in dependencies with Safety for ${{ matrix.app }}
-        if: ${{ matrix.app }} != 'app2' && ${{ matrix.app }} != 'app3'
-        run: |
-          pip install safety
-          if [ -f "$GITHUB_WORKSPACE/src/${{ matrix.app }}/requirements.txt" ]; then
-            safety scan -r $GITHUB_WORKSPACE/src/${{ matrix.app }} --no-interaction || true
-          else
-            echo "No requirements.txt for ${{ matrix.app }}, skipping Safety check"
-          fi
-        continue-on-error: true  # Continue even if vulnerabilities are found
-
-      # Set up Trivy to scan Docker image for each app
-      - name: Set up Trivy for ${{ matrix.app }}
-        uses: aquasecurity/trivy-action@master
-        with:
-          image-ref: ${{ matrix.app }}:latest
-        continue-on-error: true
-
-       # Build Docker image for each app
-      - name: Build Docker image for ${{ matrix.app }}
-        run: |
-          cd $GITHUB_WORKSPACE/src/${{ matrix.app }}
-          docker build -t ${{ matrix.app }} -f src/${{ matrix.app }}/Dockerfile .
-
-      # Scan Docker image for vulnerabilities with Trivy
-      - name: Scan Docker image for vulnerabilities with Trivy for ${{ matrix.app }}
-        run: |
-          trivy image --severity HIGH,CRITICAL --no-progress ${{ matrix.app }}:latest || true
+    # 5. Run Container Security Scan (z.B. mit Trivy)
+    - name: Run Trivy Scan for Docker Images
+      run: |
+        docker pull your-docker-image:latest
+        trivy image your-docker-image:latest
