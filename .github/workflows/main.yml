@@ -1,10 +1,3 @@
-
-Wenn du einen Fehler mit der Version v2 der upload-artifact Action hattest, versuche, auf v3 zu aktualisieren, da diese neuere Version möglicherweise besser kompatibel ist und Fehler beheben könnte.
-
-Hier ist der angepasste Workflow mit upload-artifact@v3:
-
-yaml
-Code kopieren
 name: DevSecOps Pipeline with Vulnerability Management
 
 on:
@@ -107,4 +100,3 @@ jobs:
       - name: Scan Docker image for vulnerabilities with Trivy for ${{ matrix.app }}
         run: |
           trivy image --severity HIGH,CRITICAL --no-progress ${{ matrix.app }}:latest || true
-
