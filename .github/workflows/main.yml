@@ -1,4 +1,4 @@
-name: DevSecOps Pipeline
+name: DevSecOps Pipeline with Vulnerability Management
 
 on:
   push:
@@ -9,12 +9,12 @@ on:
       - main
 
 jobs:
-  build-and-test:
+  build-test-scan:
     runs-on: ubuntu-latest
 
     strategy:
       matrix:
-        app: [app1, app2]  
+        app: [app1, app2]  # List all applications here
 
     steps:
       - name: Checkout code
@@ -23,24 +23,47 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v2
         with:
-          python-version: '3.9'
+          python-version: '3.8'
 
-      - name: Install dependencies
+      # Install dependencies for each app
+      - name: Install dependencies for ${{ matrix.app }}
         run: |
           cd $GITHUB_WORKSPACE/src/${{ matrix.app }}
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-        working-directory: ./${{ matrix.app }}
 
-      - name: Run Unit Tests
+      # Run Unit Tests for each app
+      - name: Run Unit Tests for ${{ matrix.app }}
         run: |
           cd $GITHUB_WORKSPACE/src/${{ matrix.app }}
           pytest --maxfail=1 --disable-warnings
-        working-directory: ./${{ matrix.app }}
 
-      - name: Run SAST with Bandit
+      # Run SAST with Bandit for each app
+      - name: Run SAST with Bandit for ${{ matrix.app }}
         run: |
           cd $GITHUB_WORKSPACE/src/${{ matrix.app }}
-          pip install bandit
-          bandit -r src/ || true
-        working-directory: ./${{ matrix.app }}
+          bandit -r .
+
+      # Check for vulnerabilities in Python dependencies with Safety
+      - name: Check vulnerabilities in dependencies with Safety for ${{ matrix.app }}
+        run: |
+          pip install safety
+          cd $GITHUB_WORKSPACE/src/${{ matrix.app }}
+          safety check -r requirements.txt
+
+      # Set up Trivy to scan Docker image for each app
+      - name: Set up Trivy for ${{ matrix.app }}
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: ${{ matrix.app }}:latest
+
+      # Build Docker image for each app
+      - name: Build Docker image for ${{ matrix.app }}
+        run: |
+          cd $GITHUB_WORKSPACE/src/${{ matrix.app }}
+          docker build -t ${{ matrix.app }}:latest .
+
+      # Scan Docker image for vulnerabilities with Trivy
+      - name: Scan Docker image for vulnerabilities with Trivy for ${{ matrix.app }}
+        run: |
+          trivy image --severity HIGH,CRITICAL --no-progress ${{ matrix.app }}:latest
