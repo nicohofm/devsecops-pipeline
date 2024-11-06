@@ -63,11 +63,10 @@ jobs:
           ln -s /opt/dependency-check/bin/dependency-check /usr/local/bin/dependency-check
 
       # Run Dependency-Check for each app
-      - name: Run Dependency-Check for SCA for ${{ matrix.app }}
-        uses: dependency-check-action/owasp-dependency-check-action@v3
-        with:
-          project: ${{ matrix.app }}
-          directory: $GITHUB_WORKSPACE/src/${{ matrix.app }}
+      - name: Run Dependency-Check for ${{ matrix.app }}
+        run: |
+          # Run Dependency-Check for the application
+          dependency-check --project ${{ matrix.app }} --scan $GITHUB_WORKSPACE/src/${{ matrix.app }} --out $GITHUB_WORKSPACE/src/${{ matrix.app }}/dependency-check-report
         continue-on-error: true
 
        # Build Docker image for each app
