@@ -61,6 +61,14 @@ jobs:
           pip install safety
           cd $GITHUB_WORKSPACE/src
           safety check -r requirements.txt
+
+          # Conditional Flask installation for app1
+          if [ "${{ matrix.app }}" == "app1" ]; then
+            echo "Checking Flask for app1"
+            safety check -r requirements.txt
+          else
+            echo "Skipping Flask Check for ${{ matrix.app }}"
+          fi
         continue-on-error: true 
 
       # Set up Trivy to scan Docker image for each app
