@@ -44,7 +44,7 @@ jobs:
       - name: Run SAST with Bandit for ${{ matrix.app }}
         run: |
           cd $GITHUB_WORKSPACE/src/${{ matrix.app }}
-          bandit -r . || true # Continue pipeline even if Bandit finds issues
+          bandit -r . || true
 
       # Check for vulnerabilities in Python dependencies with Safety
       - name: Check vulnerabilities in dependencies with Safety for ${{ matrix.app }}
@@ -52,8 +52,7 @@ jobs:
           pip install safety
           cd $GITHUB_WORKSPACE/src/${{ matrix.app }}
           safety check -r requirements.txt
-          continue-on-error: true  # Continue the pipeline even if vulnerabilities are found
-
+          continue-on-error: true 
       # Set up Trivy to scan Docker image for each app
       - name: Set up Trivy for ${{ matrix.app }}
         uses: aquasecurity/trivy-action@master
