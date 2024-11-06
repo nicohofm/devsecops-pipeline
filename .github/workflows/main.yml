@@ -34,16 +34,36 @@ jobs:
       # Run Unit Tests for each app
       - name: Run Unit Tests for ${{ matrix.app }}
         run: |
+          mkdir -p $GITHUB_WORKSPACE/src/${{ matrix.app }}/test-report
           cd $GITHUB_WORKSPACE/src/${{ matrix.app }}
-          pytest --maxfail=1 --disable-warnings
+          pytest --maxfail=1 --disable-warnings --junitxml=$GITHUB_WORKSPACE/src/${{ matrix.app }}/test-report/results.xml
         continue-on-error: true
+
+      # Upload Unit Test Report
+      - name: Upload Unit Test Report for ${{ matrix.app }}
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: unit-test-report-${{ matrix.app }}
+          path: $GITHUB_WORKSPACE/src/${{ matrix.app }}/test-report/
+          if-no-files-found: warn
 
       # Run SAST with Bandit for each app
       - name: Run SAST with Bandit for ${{ matrix.app }}
         run: |
+          mkdir -p $GITHUB_WORKSPACE/src/${{ matrix.app }}/bandit-report
           cd $GITHUB_WORKSPACE/src/${{ matrix.app }}
-          bandit -r . || true
+          bandit -r . -f xml -o $GITHUB_WORKSPACE/src/${{ matrix.app }}/bandit-report/bandit-report.xml || true
         continue-on-error: true
+
+      # Upload Bandit SAST Report
+      - name: Upload Bandit SAST Report for ${{ matrix.app }}
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: bandit-sast-report-${{ matrix.app }}
+          path: $GITHUB_WORKSPACE/src/${{ matrix.app }}/bandit-report/
+          if-no-files-found: warn
 
       # Install OWASP Dependency-Check
       - name: Install OWASP Dependency-Check
@@ -65,25 +85,20 @@ jobs:
       # Run Dependency-Check for each app
       - name: Run Dependency-Check for ${{ matrix.app }}
         run: |
-          # Sicherstellen, dass das Ausgabe-Verzeichnis existiert
           mkdir -p $GITHUB_WORKSPACE/src/${{ matrix.app }}/dependency-check-report
-          
-          # Dependency-Check ausführen und Ergebnisse im Report-Verzeichnis speichern
           dependency-check --project ${{ matrix.app }} --scan $GITHUB_WORKSPACE/src/${{ matrix.app }} --out $GITHUB_WORKSPACE/src/${{ matrix.app }}/dependency-check-report
-
-          # Ausgabe des Verzeichnisinhalts zur Überprüfung
           echo "Contents of the dependency-check-report directory:"
           ls -al $GITHUB_WORKSPACE/src/${{ matrix.app }}/dependency-check-report
         continue-on-error: true
 
-      # Upload Dependency-Check Report als Artefakt (nach Verzeichnisüberprüfung)
+      # Upload Dependency-Check Report
       - name: Upload Dependency-Check Report
         if: always()
         uses: actions/upload-artifact@v3
         with:
           name: dependency-check-report-${{ matrix.app }}
           path: $GITHUB_WORKSPACE/src/${{ matrix.app }}/dependency-check-report/
-          if-no-files-found: warn  # Warnung statt Fehler, wenn keine Dateien gefunden werden
+          if-no-files-found: warn
 
       # Build Docker image for each app
       - name: Build Docker image for ${{ matrix.app }}
@@ -102,4 +117,3 @@ jobs:
       - name: Scan Docker image for vulnerabilities with Trivy for ${{ matrix.app }}
         run: |
           trivy image --severity HIGH,CRITICAL --no-progress ${{ matrix.app }}:latest || true
-
