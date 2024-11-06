@@ -3,7 +3,7 @@ name: DevSecOps Pipeline with Vulnerability Management
 on:
   push:
     branches:
-      - main
+      - tim_dev
 
 jobs:
   build-test-scan:
