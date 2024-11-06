@@ -65,7 +65,7 @@ jobs:
       - name: Build Docker image for ${{ matrix.app }}
         run: |
           cd $GITHUB_WORKSPACE/src/${{ matrix.app }}
-          docker build -t ${{ matrix.app }} .
+          docker build -t ${{ matrix.app }} -f src/${{ matrix.app }}/Dockerfile .
 
       # Scan Docker image for vulnerabilities with Trivy
       - name: Scan Docker image for vulnerabilities with Trivy for ${{ matrix.app }}
