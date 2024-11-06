@@ -7,9 +7,6 @@ WORKDIR /app
 # Kopiere die Anwendungsdateien in das Arbeitsverzeichnis
 COPY . /app
 
-# Installiere die Abhängigkeiten
-RUN pip install --no-cache-dir -r requirements.txt
-
 # Exponiere den Port, auf dem die App läuft
 EXPOSE 5000
 
