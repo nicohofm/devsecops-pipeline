@@ -54,7 +54,13 @@ jobs:
           bandit -r . || true
         continue-on-error: true
 
-      
+      # Install OWASP Dependency-Check
+      - name: Install OWASP Dependency-Check
+        run: |
+          # Download and unzip Dependency-Check
+          wget https://github.com/jeremydmiller/owasp-dependency-check/releases/download/v6.5.1/dependency-check-6.5.1-release.zip
+          unzip dependency-check-6.5.1-release.zip -d /opt/
+          ln -s /opt/dependency-check/bin/dependency-check /usr/local/bin/dependency-check
 
       # Run Dependency-Check for each app
       - name: Run Dependency-Check for SCA for ${{ matrix.app }}
