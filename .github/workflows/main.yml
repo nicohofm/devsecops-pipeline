@@ -34,12 +34,11 @@ jobs:
           pip install bandit  # Install Bandit
           pip install pytest  # Install pytest if not already in requirements.txt
 
-          # Conditional Flask installation for app1
-          if [ "${{ matrix.app }}" == "app1" ]; then
-            echo "Installing Flask for app1"
+          # Install dependencies from app-specific requirements.txt
+          if [ -f "requirements.txt" ]; then
             pip install -r requirements.txt
           else
-            echo "Skipping Flask installation for ${{ matrix.app }}"
+            echo "No requirements.txt found for ${{ matrix.app }}"
           fi
 
       # Run Unit Tests for each app
@@ -57,18 +56,15 @@ jobs:
 
       # Check for vulnerabilities in Python dependencies with Safety
       - name: Check vulnerabilities in dependencies with Safety for ${{ matrix.app }}
+        if: ${{ matrix.app }} != 'app2' && ${{ matrix.app }} != 'app3'
         run: |
           pip install safety
-          cd $GITHUB_WORKSPACE/src
-
-          # Conditional Flask installation for app1
-          if [ "${{ matrix.app }}" == "app1" ]; then
-            echo "Checking Flask for app1"
-            safety check -r requirements.txt
+          if [ -f "$GITHUB_WORKSPACE/src/${{ matrix.app }}/requirements.txt" ]; then
+            safety check -r $GITHUB_WORKSPACE/src/${{ matrix.app }}/requirements.txt
           else
-            echo "Skipping Flask Check for ${{ matrix.app }}"
+            echo "No requirements.txt for ${{ matrix.app }}, skipping Safety check"
           fi
-        continue-on-error: true 
+        continue-on-error: true  # Continue even if vulnerabilities are found
 
       # Set up Trivy to scan Docker image for each app
       - name: Set up Trivy for ${{ matrix.app }}
